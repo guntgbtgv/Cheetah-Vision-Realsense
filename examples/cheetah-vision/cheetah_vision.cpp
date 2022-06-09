@@ -32,12 +32,12 @@ int main(int argc, char * argv[]) try
 
     printf("%s\n", dev.get_info(RS2_CAMERA_INFO_NAME) );
     std::string name = dev.get_info(RS2_CAMERA_INFO_NAME);
-    if( (name.compare("Intel RealSense D435")) == 0 ){
-      //printf("stream higer rate with %s\n", name.c_str() );
+    if( (name.compare("Intel RealSense D435I")) == 0 ){
+      printf("stream higer rate with %s\n", name.c_str() );
       // Only when USB 3.0 is available
-      // cfg.enable_stream(RS2_STREAM_DEPTH, 640,480, RS2_FORMAT_Z16, 90);
+      cfg.enable_stream(RS2_STREAM_DEPTH, 640,480, RS2_FORMAT_Z16, 90);
     }else{
-      cfg.enable_stream(RS2_STREAM_POSE, RS2_FORMAT_6DOF);
+      //cfg.enable_stream(RS2_STREAM_POSE, RS2_FORMAT_6DOF);
     }
     pipe.start(cfg);
     pipelines.push_back(pipe);
@@ -49,7 +49,10 @@ int main(int argc, char * argv[]) try
   // std::thread lidar_sub_thread(&handleLCM);
 
   pointcloud_thread = std::thread(&pointcloud_process_running);
+
   localization_thread = std::thread(&localization_process_running);
+
+  printf("*****1******\n");
 
   while (true) { usleep(10000); }
   return EXIT_SUCCESS;
@@ -71,7 +74,7 @@ void pointcloud_loop(){
   // Wait for the next set of frames from the camera
   auto D435frames = pipelines[0].wait_for_frames();
   auto depth = D435frames.get_depth_frame();
-
+  printf("*****4******\n");
   // Generate the pointcloud and texture mappings
   points = pc.calculate(depth);
 
