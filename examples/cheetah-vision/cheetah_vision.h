@@ -18,8 +18,8 @@ int WORLD_SIZE = 10;
 
 SE3 robot_to_D435(0.28, 0.0, -0.01, 0, 0.49, 0);
 //SE3 T265_to_robot(0.0, 0.0, 0.07, M_PI, 0., -M_PI/2.); // parallel attachment of realsense
-SE3 T265_to_robot(0.0, 0.0, 0.07, M_PI, 0., M_PI);
-SE3 global_to_T265_frame(0.0, 0.0, 0.25, M_PI/2., 0.0, -M_PI/2.);
+SE3 T265_to_robot(0.0, 0.0, 0.07, 0., M_PI/2., -M_PI/2.);  //(0.0, 0.0, 0.07, M_PI, 0., M_PI);
+SE3 global_to_T265_frame(0.0, 0.0, 0.25, 0., M_PI/2., -M_PI/2.); //(0.0, 0.0, 0.25, M_PI/2., 0.0, -M_PI/2.);
 
 SE3 T265_frame_to_T265, global_to_T265, global_to_robot, global_to_D435;
 SE3 corrected_global_to_robot;
@@ -48,14 +48,14 @@ void localization_loop(){
   auto f = T265frames.first_or_default(RS2_STREAM_POSE);
 
   // Cast the frame to pose_frame and get its data
-  //auto pose_frame = f.as<rs2::pose_frame>();
+  auto pose_frame = f.as<rs2::pose_frame>();
 
-  //T265_frame_to_T265.rsPoseToSE3(pose_frame);
+  T265_frame_to_T265.rsPoseToSE3(pose_frame);
 
-  SE3 corrected_global_to_robot(0.0, 0.0, -0.25, 0.0, 0.0, 0.0); 
+  //SE3 corrected_global_to_robot(0.0, 0.0, 0.25, 0.0, 0.0, 0.0); 
 
-  //SE3::SE3Multi(global_to_T265_frame, T265_frame_to_T265, global_to_T265);
-  //SE3::SE3Multi(global_to_T265, T265_to_robot, global_to_robot);
+  SE3::SE3Multi(global_to_T265_frame, T265_frame_to_T265, global_to_T265);
+  SE3::SE3Multi(global_to_T265, T265_to_robot, global_to_robot);
 
   static double rpy[3];
   if(iter<2){
@@ -78,8 +78,8 @@ void localization_loop(){
   }
   //initial_posture_correction.print("correction");
   //printf("initial rpy: %f, %f, %f\n", rpy[0], rpy[1], rpy[2]);
-  //SE3::SE3Multi(initial_posture_correction, global_to_robot, corrected_global_to_robot);
-  //SE3::SE3Multi(corrected_global_to_robot, robot_to_D435, global_to_D435);
+  SE3::SE3Multi(initial_posture_correction, global_to_robot, corrected_global_to_robot);
+  SE3::SE3Multi(corrected_global_to_robot, robot_to_D435, global_to_D435);
   
   //global_to_T265.print("G2T");
   //T265_to_robot.print("T2R");
